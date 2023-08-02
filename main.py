@@ -3,6 +3,7 @@ from tkinter import *
 from tkinter import filedialog as fd
 import os
 from pathlib import Path
+import PyPDF2
 
 filepath = None
 
@@ -35,11 +36,20 @@ def read_content():
 
 def get_content():
     global filepath
-    # print(filepath)
+    file_format = f"{Path(filepath).name.split('.')[1]}"
+    print(file_format)
     content = ""
     try:
-        with open(file=f"{filepath}") as file:
-            content += file.read()
+        if file_format == "pdf":
+            pdf_file_obj = open(filepath, 'rb')
+            pdf_reader = PyPDF2.PdfReader(pdf_file_obj)
+            for i in range(len(pdf_reader.pages)):
+                page_obj = pdf_reader.pages[0]
+                content += page_obj.extract_text()
+            pdf_file_obj.close()
+        else:
+            with open(file=f"{filepath}") as file:
+                content += file.read()
     except FileNotFoundError:
         pass
     return content
